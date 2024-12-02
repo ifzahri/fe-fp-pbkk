@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/definitions';
+import Cookies from 'universal-cookie'; // Import universal-cookie
 
 interface AuthState {
   user: User | null;
@@ -34,6 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading: true,
   });
 
+  const cookies = new Cookies(); // Initialize universal-cookie
+
   useEffect(() => {
     // Check authentication on mount
     const checkAuth = () => {
@@ -43,10 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const parsedAuth = JSON.parse(stored);
           setState({ ...parsedAuth, isLoading: false });
         } else {
-          setState(prev => ({ ...prev, isLoading: false }));
+          setState((prev) => ({ ...prev, isLoading: false }));
         }
       } catch (error) {
-        setState(prev => ({ ...prev, isLoading: false }));
+        setState((prev) => ({ ...prev, isLoading: false }));
       }
     };
 
@@ -57,12 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const newState = { user, token, isLoading: false };
     setState(newState);
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ user, token }));
+    cookies.set('auth-storage', JSON.stringify({ user, token }), { path: '/' }); // Set cookie on login
     router.push('/');
   }, [router]);
 
   const logout = useCallback(() => {
     setState({ user: null, token: null, isLoading: false });
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    cookies.remove('auth-storage', { path: '/' }); // Remove cookie on logout
     router.push('/login');
   }, [router]);
 
