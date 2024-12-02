@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { TaskList } from '@/components/TaskList';
+import { TodoList } from '@/components/todo-list';
 import { useAuthStore } from '@/store/auth';
 
 export default function HomePage() {
@@ -17,5 +17,5 @@ export default function HomePage() {
     return null;
   }
 
-  return <TaskList />;
+  return <TodoList />;
 }

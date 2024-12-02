@@ -1,25 +1,43 @@
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Cookies from 'universal-cookie';
 import { TodoList } from '@/components/todo-list';
 
-export default async function HomePage() {
-  const cookieStore = cookies();
-  const authCookie = (await cookieStore).get('auth-storage');
+export default function HomePage() {
+  const router = useRouter();
+  const cookies = new Cookies();
 
-  // If no auth cookie, redirect to login
-  if (!authCookie) {
-    redirect('/login');
-  }
+  useEffect(() => {
+    const authCookie = cookies.get('auth-storage');
+    console.log('Auth cookie:', authCookie);
 
-  try {
-    // Parse the auth cookie to check if it has valid token
-    const authData = JSON.parse(authCookie.value);
-    if (!authData?.state?.token) {
-      redirect('/login');
+    if (!authCookie) {
+      router.push('/login'); // Redirect to login if no cookie is found
+      return;
     }
-  } catch (error) {
-    redirect('/login');
-  }
+
+    try {
+      // Check if the authCookie is already an object or needs to be parsed
+      let authData;
+      if (typeof authCookie === 'string') {
+        authData = JSON.parse(authCookie);  // Parse only if it's a string
+      } else {
+        authData = authCookie;  // It's already an object, no need to parse
+      }
+
+      console.log('Parsed Auth Data:', authData);
+
+      // Check if the token is valid
+      if (!authData?.token) {
+        router.push('/login'); // Redirect to login if no token
+      }
+    } catch (error) {
+      console.error('Error parsing auth cookie:', error);
+      router.push('/login'); // Redirect to login if cookie is malformed
+    }
+  }, [router, cookies]);
 
   return (
     <main className="container mx-auto p-4">

@@ -54,6 +54,7 @@ export function TodoList() {
     if (!token) return;
     setIsLoading(true);
     try {
+      // console.log(token);
       const response = await api.getTasks(token);
       if (response.status) {
         setTasks(response.data);
